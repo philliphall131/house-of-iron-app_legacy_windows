@@ -1,19 +1,27 @@
-import { Button, View, Text } from "react-native";
+import * as React from 'react';
+import { Button, View, Text, TextInput } from "react-native";
 
 export default function SignInScreen({navigation}) {
+  const [username, setUsername] = React.useState('');
+  const [password, setPassword] = React.useState('');
+
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Details Screen</Text>
-      <Button
-        title="Go to Details... again"
-        onPress={() => navigation.push('Sign In')}
+    <View>
+      <TextInput
+        placeholder="Username"
+        value={username}
+        onChangeText={setUsername}
       />
-      <Button title="Go to Home" onPress={() => navigation.navigate('Home')} />
-      <Button title="Go back" onPress={() => navigation.goBack()} />
-      <Button
-        title="Go back to first screen in stack"
-        onPress={() => navigation.popToTop()}
+      <TextInput
+        placeholder="Password"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
       />
+      <Button title="Sign in" onPress={() => alert({ username, password })} />
+
+      <Text>Dont's have an account yet?</Text>
+      <Button title="Sign Up" onPress={() => navigation.navigate('SignUp')} />
     </View>
   );
-  }
+}

@@ -1,11 +1,24 @@
-import { Button, View, Text } from "react-native";
+import { useContext } from "react";
+import { Button, View, Text, StyleSheet } from "react-native";
+import { AuthContext, StateContext } from "../ContextObjs";
 
 export default function HomeScreen() {
+  const {signOut} = useContext(AuthContext);
+  const state = useContext(StateContext);
 
     return (
-      <View>
+      <View style={styles.container}>
         <Text>Signed in!</Text>
-        <Button title="Sign out" />
+        <Button title="Sign out" onPress={signOut}/>
       </View>
     );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    maxWidth: 600,
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
+});

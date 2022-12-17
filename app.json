@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "house-of-iron-app",
+    "name": "House of Iron",
     "slug": "house-of-iron-app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -18,7 +18,8 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.philhall.house-of-iron"
     },
     "android": {
       "adaptiveIcon": {

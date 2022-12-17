@@ -1,25 +1,40 @@
-import * as React from 'react';
+import { useState, useContext } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableHighlight } from "react-native";
-
+import { AuthContext, StateContext } from '../ContextObjs';
+import ironAPI from '../utils/ironAPI';
 
 export default function SignUpScreen({navigation}) {
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
-  const [password2, setPassword2] = React.useState('');
-  const [firstName, setFirstName] = React.useState('');
-  const [lastName, setLastName] = React.useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [password2, setPassword2] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
 
-  const submitSignUp = () => {
+  const { signIn } = useContext(AuthContext)
+  const { dispatch } = useContext(StateContext)
+
+  const submitSignUp = async () => {
     if (password !== password2){
       alert('Passwords do not match')
+      return
     } else {
       let data = {
-        'email':email,
-        'password':password,
+        'email': email,
+        'password': password,
         'first_name': firstName,
         'last_name': lastName
       }
-      console.log(data)
+      let response = await ironAPI.signup(data)
+      if (response){
+        if (response.error) {
+          alert(`Invalid login credentials`)
+          return
+        } else {
+          dispatch({ type: 'SIGN_IN', data: response.data });
+          return
+        }
+      } 
+      alert('Signup failed, try again or contact site admin')
     }
   }
 

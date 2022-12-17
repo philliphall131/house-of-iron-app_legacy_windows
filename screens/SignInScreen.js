@@ -1,6 +1,6 @@
 import { useState, useContext } from 'react';
 import { Button, View, Text, TextInput, StyleSheet, TouchableOpacity } from "react-native";
-import { AuthContext, StateContext } from '../ContextObjs';
+import { AuthContext } from '../ContextObjs';
 
 
 export default function SignInScreen({navigation}) {
@@ -8,7 +8,6 @@ export default function SignInScreen({navigation}) {
   const [password, setPassword] = useState('');
 
   const { signIn } = useContext(AuthContext)
-  const state = useContext(StateContext)
 
   return (
     <View style={styles.container}>

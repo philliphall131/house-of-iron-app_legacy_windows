@@ -3,12 +3,12 @@ import { Button, View, Text, StyleSheet } from "react-native";
 import { AuthContext, StateContext } from "../ContextObjs";
 
 export default function HomeScreen() {
-  const {signOut} = useContext(AuthContext);
-  const state = useContext(StateContext);
+  const { signOut } = useContext(AuthContext);
+  const { state } = useContext(StateContext);
 
     return (
       <View style={styles.container}>
-        <Text>Signed in!</Text>
+        <Text>{state.user.first_name} is signed in!</Text>
         <Button title="Sign out" onPress={signOut}/>
       </View>
     );

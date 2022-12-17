@@ -1,5 +1,5 @@
 import { useEffect, useReducer, useMemo } from 'react';
-import { StyleSheet, View, Platform } from 'react-native';
+import { Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from './screens/HomeScreen';
@@ -26,6 +26,14 @@ export default function App() {
 
           };
         case 'SIGN_IN':
+          // store the token
+          if (Platform.OS === 'web') {
+            sessionStorage.setItem("userToken", action.data.token);
+            sessionStorage.setItem("userId", action.data.user.id);
+          } else {
+            SecureStore.setItemAsync('userToken', action.data.token);
+            SecureStore.setItemAsync('userId', String(action.data.user.id));
+          }
           return {
             ...prevState,
             isSignout: false,
@@ -33,6 +41,14 @@ export default function App() {
             user: action.data.user
           };
         case 'SIGN_OUT':
+          // reset token to null
+          if (Platform.OS === 'web') {
+            sessionStorage.setItem("userToken", null);
+            sessionStorage.setItem("userId", null);
+          } else {
+            SecureStore.deleteItemAsync('userToken', null);
+            SecureStore.deleteItemAsync('userId', null);
+          }
           return {
             ...prevState,
             isSignout: true,
@@ -54,7 +70,7 @@ export default function App() {
     const bootstrapAsync = async () => {
       let userToken;
       let userId;
-      let data;
+      let data = { user: null, token: null };
       try {
         // Restore token
         if (Platform.OS === 'web'){
@@ -70,61 +86,56 @@ export default function App() {
       // If a token was retrieved, validate Token, get user info
       if (userId && userToken){
         let userResponse = await ironAPI.getUser(userId, userToken)
-        console.log(userResponse)
-        if (userResponse && userResponse.status && userResponse.status !== 200){
+        if (userResponse && userResponse.data){
           data = { user: userResponse.data, token: userToken }
         } else {
-          console.error('Error retrieving user, contact admin')
-          data = { user: null, token: null }
+          console.log('Could not retrieve user with credentials stored, try logging in')
         }
-      } else {
-        data = { user: null, token: null }
-      }
+      };
       dispatch({ type: 'RESTORE_TOKEN', data });
     };
 
     bootstrapAsync();
   }, []);
 
-  const authContext = useMemo(
-    () => ({
-      signIn: async (data) => {
-        // get a token (and handle errors)
-        let response = await ironAPI.login(data)
-        if (!response){
-          alert('Error with login request, contact site admin')
+  const authContext = {
+    signIn: async (data) => {
+      // get a token (and handle errors)
+      let response = await ironAPI.login(data)
+      if (response){
+        if (response.error) {
+          alert(`${response.error}: Invalid login credentials`)
           return
-        } else if (response && response.status && (response.status !== 202)) {
-          alert('Invalid login credentials')
+        } else if (response.data && response.data.token && response.data.user) {
+          // add the token to state
+          dispatch({ type: 'SIGN_IN', data: response.data });
           return
-        }
-        // store the token
-        if (Platform.OS === 'web'){
-          sessionStorage.setItem("userToken", response.data.token);
-          sessionStorage.setItem("userId", response.data.user.id);
         } else {
-          await SecureStore.setItemAsync('userToken', response.data.token);
-          await SecureStore.setItemAsync('userId', String(response.data.user.id));
+          alert('Error with login response, contact site admin')
+          return
         }
-        // add the token to state
-        dispatch({ type: 'SIGN_IN', data: response.data });
-      },
-      signOut: () => dispatch({ type: 'SIGN_OUT' }),
-      signUp: async (data) => {
-        // In a production app, we need to send user data to server and get a token
-        // We will also need to handle errors if sign up failed
-        // After getting token, we need to persist the token using `SecureStore` or any other encrypted storage
-        // In the example, we'll use a dummy token
+      }
+      alert('Error with login request, contact site admin')
+    },
+    signOut: () => dispatch({ type: 'SIGN_OUT' }),
+    signUp: async (data) => {
+      // In a production app, we need to send user data to server and get a token
+      // We will also need to handle errors if sign up failed
+      // After getting token, we need to persist the token using `SecureStore` or any other encrypted storage
+      // In the example, we'll use a dummy token
 
-        dispatch({ type: 'SIGN_IN', token: 'dummy-auth-token' });
-      },
-    }),
-    []
-  );
+      dispatch({ type: 'SIGN_IN', token: 'dummy-auth-token' });
+    },
+  };
+
+  const stateContext = {
+    'state': state,
+    'dispatch': dispatch
+  }
 
   return (
     <AuthContext.Provider value={authContext}>
-      <StateContext.Provider value={state}>
+      <StateContext.Provider value={stateContext}>
         <NavigationContainer>
           <Stack.Navigator>
           {state.isLoading ? (

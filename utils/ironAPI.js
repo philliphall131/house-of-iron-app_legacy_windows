@@ -1,14 +1,7 @@
 import apiHelpers from "./apiHelpers";
 import axios from "axios";
-import { Platform } from "react-native";
 
-let BASE_URL;
-// for development purposes, in production substitute with the single backend link
-if (Platform.OS === 'web'){
-    BASE_URL = "http://localhost:8000/api"
-} else {
-    BASE_URL = "https://rotten-rats-refuse-97-102-228-214.loca.lt/api";
-}
+let BASE_URL = "http://192.168.1.183:8000/api";
 
 const ironAPI = {}
 
@@ -26,8 +19,7 @@ ironAPI.signup = async (signupData) => {
 
 ironAPI.getUser = async (id, token) => {
     return await apiHelpers.tryCatchFetch(() =>
-        axios.get(`${BASE_URL}/users/${id}`, apiHelpers.options(token))
-    );
+    axios.get(`${BASE_URL}/users/${id}/`, apiHelpers.options(token)));
 }
 
 export default ironAPI
